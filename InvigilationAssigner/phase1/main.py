@@ -1,37 +1,30 @@
 import datetime
 import sys
-sys.path.append(r"D:\Ritankar_work\python progs\school\projects\InvigilationAssigner\InvigilationAssigner")
+sys.path.append(".")
 from assisting import list_dict_search , abbreviate
 from helper import reset_teacher_duty
 import json
 import csv
 import random
 from alive_progress import alive_bar
+from file_change import file_change
 
 
 
 start_time = datetime.datetime.now()
 # Reset teacher duty
+file_change()
 reset_teacher_duty()
 
-with open(r"InvigilationAssigner\InvigilationAssigner\teachers.json") as fteachers, open(r"InvigilationAssigner\InvigilationAssigner\class.json") as fclass, open(
-    r"InvigilationAssigner\InvigilationAssigner\exams.json"
+with open(r"teachers.json") as fteachers, open(r"class.json") as fclass, open(
+    r"exams.json"
 ) as fexams:
     teachers = json.load(fteachers)
     classes = json.load(fclass)
     days = json.load(fexams)
 
 with alive_bar(len(days)) as bar:
-    # Create a program that assigns duty to each teacher in a class during the exam.
-    # Conditions:
-    # 1. A teacher must not have two consecutive days of duty.
-    # 2. A teacher of lesser experience will have lower class(like 6 or 7) with more hours.
-    # 3. A teacher of higher experience will have higher class(like 11 or 12) with less hours.
-    # Use teacher.json , class.json and exams.json as input.
 
-    # Start with the first day of the exam
-
-    # Determine class to be assigned to the teacher
 
 
     # Max experience calculation
@@ -39,7 +32,7 @@ with alive_bar(len(days)) as bar:
         maxm = 0
         c_date = datetime.datetime.now().date()
         for i in teachers:
-            doj = datetime.datetime.strptime(i["DOJ"], "%d-%m-%Y").date()
+            doj = datetime.datetime.strptime(i["DOJ"], "%Y-%m-%d").date()
             exp = (c_date - doj).days // 365
             if exp > maxm:
                 maxm = exp
@@ -51,7 +44,7 @@ with alive_bar(len(days)) as bar:
         teacher = list_dict_search(teachers, "id", teacher_id)
         exp = (
             datetime.datetime.now().date()
-            - datetime.datetime.strptime(teacher["DOJ"], "%d-%m-%Y").date()
+            - datetime.datetime.strptime(teacher["DOJ"], "%Y-%m-%d").date()
         ).days // 365
         return (exp / max_exp(), exp)
 
@@ -68,6 +61,25 @@ with alive_bar(len(days)) as bar:
 
 
     def teacher_availability(teacher_id, day):
+        """
+        Checks if a teacher has sufficient availability to teach on a given day.
+
+        This function checks if the teacher's schedule for two days prior to the given day
+        does not conflict with their current workload and if they have at least 999 hours
+        of remaining capacity available.
+
+        Args:
+            teacher_id (str): The ID of the teacher to check.
+            day (int): The day to check availability for.
+
+        Returns:
+            bool: True if the teacher has sufficient availability, False otherwise.
+
+        Notes:
+            This function assumes that the teacher's schedule is stored in a JSON file
+            named "teacher_duty.json" in the same directory as this script.
+        """
+
         with open("teacher_duty.json") as fteacher_duty:
             teacher_duty = json.load(fteacher_duty)
         if len(teacher_duty[str(teacher_id)]["days"]) > 1:
@@ -100,6 +112,14 @@ with alive_bar(len(days)) as bar:
 
 
     def main():
+        """
+        The main function of the Invigilation Assigner program.
+
+        This function reads a list of days, assigns teachers to each day's rooms based on class sizes,
+        and then writes out the assignments to CSV files for each day.
+
+        :return: None
+        """
         duties = {}
         for day in days:
             duty = {}
@@ -116,7 +136,7 @@ with alive_bar(len(days)) as bar:
 
             duties[day] = duty
 
-            with open(f"InvigilationAssigner\InvigilationAssigner\duty\{day}.csv", "w") as f:
+            with open(f"duty\{day}.csv", "w") as f:
                 d_file=csv.writer(f,lineterminator="\n")
                 d_file.writerow(["Day", "Room", "Teacher(ID)"])
                 for room in duties[day]:
