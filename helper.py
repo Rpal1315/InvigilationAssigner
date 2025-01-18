@@ -1,7 +1,7 @@
 import json
 def reset_teacher_duty():  
     # Read the data from teachers.json
-    with open('teachers.json') as f:
+    with open(r'D:\Ritankar_work\python progs\school\projects\InvigilationAssigner\InvigilationAssigner\teachers.json') as f:
         teachers = json.load(f)
 
     # Create a dictionary to store the data for teacher_duty.json

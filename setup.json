@@ -1,4 +1,4 @@
 {
-    "teacher_file": "D:\\Ritankar_work\\PythonProjects\\InvigilationAssigner\\Teachers Details 2024-25.csv",
+    "teacher_file": "test_teachers.csv",
     "exams_file":"exams.json"
 }
